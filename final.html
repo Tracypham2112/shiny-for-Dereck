@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Motivational Quote</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      transition: background-color 0.5s, color 0.5s;
+    }
+    .fade-in {
+      animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-white text-gray-800 dark:bg-gray-900 dark:text-white min-h-screen flex flex-col items-center justify-center p-4">
+  <div class="w-full max-w-xl text-center">
+    <h1 class="text-3xl sm:text-4xl font-bold mb-6">🌟 Daily Motivational Quote</h1>
+
+    <div id="quoteBox" class="fade-in text-xl sm:text-2xl font-semibold mb-4">Loading...</div>
+    <div id="authorBox" class="fade-in text-lg mb-6 italic text-gray-600 dark:text-gray-300"></div>
+
+    <div class="space-x-2">
+      <button onclick="showQuote()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow transition">🔄 New Quote</button>
+      <button onclick="toggleLanguage()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full shadow transition">🌐 Translate</button>
+      <button onclick="toggleFavorite()" class="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow transition">❤️ Save</button>
+      <button onclick="toggleDarkMode()" class="px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-full shadow transition">🌓 Mode</button>
+    </div>
+
+    <p class="mt-6 text-sm">⏰ Costa Rica time: <span id="costarica-time">--:--</span></p>
+
+    <div class="mt-6">
+      <h2 class="text-lg font-semibold mb-2">💖 Your Favorites:</h2>
+      <ul id="favoritesList" class="text-sm text-left list-disc list-inside"></ul>
+    </div>
+  </div>
+
+  <script>
+    const quotes = [
+      { text: "Believe you can and you're halfway there.", text_es: "Cree que puedes y ya estás a mitad de camino.", author: "Theodore Roosevelt" },
+      { text: "The only way to do great work is to love what you do.", text_es: "La única forma de hacer un gran trabajo es amar lo que haces.", author: "Steve Jobs" },
+      { text: "Success is not the key to happiness. Happiness is the key to success.", text_es: "El éxito no es la clave de la felicidad. La felicidad es la clave del éxito.", author: "Albert Schweitzer" },
+      { text: "Don’t watch the clock; do what it does. Keep going.", text_es: "No mires el reloj; haz lo que él hace. Sigue adelante.", author: "Sam Levenson" },
+      { text: "You are stronger than you think.", text_es: "Eres más fuerte de lo que piensas.", author: "Unknown" },
+      // Add more quotes as desired...
+    ];
+
+    let currentIndex = 0;
+    let currentLang = 'en';
+
+    function showQuote() {
+      const quote = quotes[Math.floor(Math.random() * quotes.length)];
+      currentIndex = quotes.indexOf(quote);
+      const quoteText = currentLang === 'en' ? quote.text : quote.text_es;
+
+      document.getElementById('quoteBox').textContent = `"${quoteText}"`;
+      document.getElementById('authorBox').textContent = `– ${quote.author}`;
+
+      document.getElementById('quoteBox').classList.remove('fade-in');
+      document.getElementById('authorBox').classList.remove('fade-in');
+      void document.getElementById('quoteBox').offsetWidth; // trigger reflow
+      void document.getElementById('authorBox').offsetWidth;
+      document.getElementById('quoteBox').classList.add('fade-in');
+      document.getElementById('authorBox').classList.add('fade-in');
+    }
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'en' ? 'es' : 'en';
+      showQuote();
+    }
+
+    function toggleFavorite() {
+      const quote = quotes[currentIndex];
+      const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+      const quoteText = `${quote.text} – ${quote.author}`;
+      if (!favorites.includes(quoteText)) {
+        favorites.push(quoteText);
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        renderFavorites();
+      }
+    }
+
+    function renderFavorites() {
+      const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+      const list = document.getElementById('favoritesList');
+      list.innerHTML = '';
+      favorites.forEach(fav => {
+        const li = document.createElement('li');
+        li.textContent = fav;
+        list.appendChild(li);
+      });
+    }
+
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    function updateCostaRicaTime() {
+      const now = new Date();
+      const costaRicaOffset = -6; // UTC-6
+      const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+      const costaRicaTime = new Date(utc + 3600000 * costaRicaOffset);
+      const timeStr = costaRicaTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('costarica-time').textContent = timeStr;
+    }
+
+    setInterval(updateCostaRicaTime, 1000);
+    window.onload = () => {
+      renderFavorites();
+      showQuote();
+      updateCostaRicaTime();
+    };
+  </script>
+</body>
+</html>
